@@ -1,0 +1,22 @@
+/* ===== 自动刷新面板（P3.2） ===== */
+.rf-line{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+.rf-line .label{color:var(--muted);flex:none;width:70px}
+.rf-gap{flex:1}
+
+.rf-dot{width:9px;height:9px;border-radius:50%;background:#cbd5e1;flex:none;display:inline-block}
+.rf-dot.on{background:#16a34a}
+.rf-dot.warn{background:#e8a33d}
+.rf-dot.off{background:#cbd5e1}
+
+/* 开关 */
+.rf-switch{position:relative;display:inline-block;width:40px;height:22px;flex:none;cursor:pointer}
+.rf-switch input{opacity:0;width:0;height:0}
+.rf-slider{position:absolute;inset:0;background:#cbd5e1;border-radius:22px;transition:.2s}
+.rf-slider:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 2px rgba(15,23,42,.2)}
+.rf-switch input:checked + .rf-slider{background:#16a34a}
+.rf-switch input:checked + .rf-slider:before{transform:translateX(18px)}
+.rf-switch input:disabled + .rf-slider{opacity:.55;cursor:not-allowed}
+
+/* 最近轮次表 */
+.rf-num{text-align:center}
+.rf-msg-cell{display:inline-block;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}

@@ -470,6 +470,80 @@ class Bridge:
                 "detail": self.get_item_detail(info["item_fk"]),
                 "stats": db.stats()}
 
+    # ---------------- 自动刷新（P3） ----------------
+
+    def get_refresh_info(self) -> Dict:
+        """自动刷新面板读取：调度器状态 + 最近轮次 + 采集器就绪情况。"""
+        if not self._ctx.data_root:
+            return {"ok": False, "message": "尚未初始化数据目录"}
+        status = self._ctx.refresh_status()
+        runs = []
+        db = self._db()
+        if db is not None:
+            try:
+                runs = db.recent_refresh_runs(8)
+            except Exception:
+                runs = []
+        try:
+            import collectors
+            ready = collectors.adapters_ready()
+            mock = collectors.mock_enabled()
+        except Exception:
+            ready, mock = False, False
+        return {"ok": True, "status": status, "runs": runs,
+                "collectors_ready": ready, "mock": mock}
+
+    def set_refresh_enabled(self, enabled=True) -> Dict:
+        """总开关：只影响定时任务；「立即刷新全部」不受影响。"""
+        if not self._ctx.data_root:
+            return {"ok": False, "message": "尚未初始化数据目录"}
+        db = self._db()
+        if db is None:
+            return {"ok": False, "message": "数据库尚未初始化"}
+        if isinstance(enabled, str):
+            flag = enabled.strip().lower() not in ("0", "false", "no", "off", "")
+        else:
+            flag = bool(enabled)
+        try:
+            db.set_setting("refresh_enabled", "1" if flag else "0")
+        except Exception as exc:
+            return {"ok": False, "message": f"保存失败：{exc}"}
+
+        if flag and self._ctx.refresh is None:
+            try:
+                self._ctx.start_refresh()
+            except Exception:
+                pass
+        return {"ok": True, "enabled": flag,
+                "status": self._ctx.refresh_status(),
+                "message": "自动刷新已开启" if flag
+                else "自动刷新已暂停（手动刷新不受影响）"}
+
+    def refresh_now(self) -> Dict:
+        """立即刷新：调度器在跑 → 排队尽快执行；未跑 → 直接同步执行一轮。"""
+        if not self._ctx.data_root:
+            return {"ok": False, "message": "尚未初始化数据目录"}
+        if self._ctx.refresh is None:
+            try:
+                self._ctx.start_refresh()
+            except Exception:
+                pass
+        engine = self._ctx.refresh
+        if engine is None:
+            return {"ok": False, "message": "自动刷新未启动，暂时无法立即刷新"}
+        try:
+            res = engine.run_now()
+        except Exception as exc:
+            return {"ok": False, "message": f"触发失败：{exc}"}
+
+        out = {"ok": True, "queued": bool(res.get("queued")),
+               "result": None, "status": self._ctx.refresh_status()}
+        if not out["queued"]:
+            out["result"] = res
+        out["message"] = res.get("message") or (
+            "已请求立即刷新" if out["queued"] else "")
+        return out
+
     # ---------------- 导出 CSV ----------------
 
     def _ask_save_path(self, default_name: str):

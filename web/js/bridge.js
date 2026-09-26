@@ -41,6 +41,11 @@
     async addPrice(pk, price, dateStr, note) { return window.pywebview.api.add_price(pk, price, dateStr, note); },
     async deletePrice(pid) { return window.pywebview.api.delete_price(pid); },
 
+    /* 自动刷新（refresh.js 使用） */
+    async getRefreshInfo() { return window.pywebview.api.get_refresh_info(); },
+    async setRefreshEnabled(on) { return window.pywebview.api.set_refresh_enabled(on); },
+    async refreshNow() { return window.pywebview.api.refresh_now(); },
+
     /* 导出（items.js 使用） */
     async exportCsv() { return window.pywebview.api.export_csv(); },
 
