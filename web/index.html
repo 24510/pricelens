@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PriceLens · 价格透镜</title>
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/settings.css"/>
+<link rel="stylesheet" href="css/catalog.css"/>
+<link rel="stylesheet" href="css/chart.css"/>
+<link rel="stylesheet" href="css/capture.css"/>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <h1>PriceLens <small>价格透镜</small></h1>
+    </div>
+    <div class="topbar-right">
+      <button id="btnAddItem" class="btn btn-sm btn-primary" type="button">＋ 添加商品</button>
+      <button id="btnKeys" class="btn btn-sm" type="button">🔑 密钥设置</button>
+      <span id="modeBadge" class="badge badge-muted">加载中…</span>
+      <span id="version" class="ver"></span>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <section id="chooser" class="panel hidden">
+      <div class="chooser-icon">⚠</div>
+      <h2>需要选择数据存放位置</h2>
+      <p class="muted">程序所在目录无法写入，请另选一个位置。</p>
+      <div class="info-row">
+        <span class="label">程序目录</span>
+        <code id="appRoot"></code>
+      </div>
+      <ul class="tips">
+        <li>推荐选择：<code>D:\PriceLensData</code> 或 U 盘上的目录</li>
+        <li>不要选：<code>C:\Program Files</code>（系统保护）</li>
+        <li>不要选：OneDrive / 网盘同步目录（可能损坏数据库）</li>
+      </ul>
+      <div class="actions">
+        <button id="btnChoose" class="btn btn-primary">选择数据目录…</button>
+        <button id="btnRetry" class="btn">重试程序目录</button>
+      </div>
+      <p id="chooserMsg" class="msg"></p>
+    </section>
+
+    <section id="dashboard" class="hidden">
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-label">运行模式</div>
+          <div class="card-value" id="cardMode">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">监控商品</div>
+          <div class="card-value" id="cardItems">0</div>
+        </div>
+        <div class="card">
+          <div class="card-label">价格记录</div>
+          <div class="card-value" id="cardPrices">0</div>
+        </div>
+        <div class="card">
+          <div class="card-label">采集端口</div>
+          <div class="card-value" id="cardPort">—</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>数据目录</h3>
+        <div class="info-row">
+          <code id="dataRoot" class="grow"></code>
+          <button class="btn btn-sm" data-open="data_root">打开</button>
+        </div>
+        <div class="info-row">
+          <span class="label">程序目录</span>
+          <code id="appRoot2" class="grow"></code>
+        </div>
+        <div class="actions">
+          <button id="btnChangeDir" class="btn btn-sm">更改数据位置…</button>
+          <button id="btnResetDir" class="btn btn-sm">恢复默认（程序目录）</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h3>监控商品</h3>
+          <span class="head-tools">
+            <span class="small muted" id="listHint"></span>
+            <span class="export-msg" id="exportMsg"></span>
+            <button id="btnRefreshItems" class="btn btn-sm" type="button">刷新</button>
+            <button id="btnExport" class="btn btn-sm" type="button">导出 CSV</button>
+          </span>
+        </div>
+        <div class="workspace">
+          <aside class="item-list">
+            <div class="item-list-body" id="itemList"></div>
+          </aside>
+          <section class="item-detail" id="itemDetail"></section>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head-row">
+          <h3>一键记价（浏览器脚本）</h3>
+          <span class="head-tools">
+            <span class="small muted" id="capStatus">读取中…</span>
+          </span>
+        </div>
+        <p class="set-note">
+          安装浏览器脚本后，商品页右下角会出现「记价小面板」：
+          新商品点一次「记录」加入监控，此后价格变化会自动入账。<br/>
+          脚本内嵌本机专属令牌，只有你的电脑能用；令牌可随时重置。
+        </p>
+        <div class="info-row">
+          <span class="label">采集接口</span>
+          <code id="capUrl" class="grow">—</code>
+          <button class="btn btn-sm" id="btnCapTest">自检</button>
+        </div>
+        <div class="info-row">
+          <span class="label">本地令牌</span>
+          <code id="capToken" class="grow">—</code>
+        </div>
+        <div class="info-row">
+          <span class="label">脚本文件</span>
+          <code id="capScript" class="grow">—</code>
+        </div>
+        <div class="actions">
+          <button class="btn btn-sm btn-primary" id="btnCapInstall" type="button">一键安装 / 更新脚本</button>
+          <button class="btn btn-sm" id="btnCapGen" type="button">生成脚本</button>
+          <button class="btn btn-sm" id="btnCapOpen" type="button">打开脚本文件夹</button>
+          <button class="btn btn-sm" id="btnCapRotate" type="button">重置令牌</button>
+        </div>
+        <ol class="tips" id="capSteps">
+          <li>浏览器装 Tampermonkey（篡改猴）扩展，并开启「允许用户脚本」</li>
+          <li>点「一键安装 / 更新脚本」→ 浏览器弹出安装页 → 点「安装」</li>
+          <li>打开任意商品页 → 右下角小面板点「记录」→ 回本程序 1 秒内出现</li>
+          <li>没弹安装页？点「生成脚本」+「打开脚本文件夹」，把 pricelens.user.js 拖进浏览器</li>
+        </ol>
+        <p class="set-msg" id="capMsg"></p>
+      </div>
+
+      <div class="panel">
+        <h3>平台配置状态</h3>
+        <table class="tbl">
+          <thead><tr><th>平台</th><th>状态</th><th>说明</th></tr></thead>
+          <tbody id="platforms"></tbody>
+        </table>
+        <p class="muted small">填写密钥后可启用自动刷新（增强模式）</p>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <span id="statusText">初始化中…</span>
+  </footer>
+</div>
+
+<script src="js/bridge.js"></script>
+<script src="js/capture.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/items.js"></script>
+<script src="js/main.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>

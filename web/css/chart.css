@@ -1,0 +1,68 @@
+/* ===== 价格曲线 + 面板工具条 + 表格按钮修复 ===== */
+
+.chart-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px 6px;
+  margin: 4px 0 14px;
+  background: #fff;
+}
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+.chart-ranges { display: inline-flex; gap: 4px; }
+.rng {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 2px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: .15s;
+}
+.rng:hover { border-color: #f97316; color: #f97316; }
+.rng.active {
+  background: rgba(249, 115, 22, .1);
+  border-color: #f97316;
+  color: #c2410c;
+  font-weight: 600;
+}
+.chart-canvas { width: 100%; height: 260px; }
+.chart-empty {
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* 面板头部的工具区（提示 + 导出按钮） */
+.head-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.export-msg {
+  font-size: 12px;
+  max-width: 460px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.export-msg.ok { color: #16a34a; }
+.export-msg.err { color: #dc2626; }
+
+/* 修复：明细表里的「删除」按钮被挤成两行 */
+.row-act { width: 84px; white-space: nowrap; }
+.row-act .btn { white-space: nowrap; }

@@ -1,0 +1,21 @@
+:root{
+  --orange:#FF6A00; --orange-dark:#e05f00;
+  --red:#E4393C; --green:#1A9C4B;
+  --bg:#F7F8FA; --card:#FFFFFF; --line:#EDEFF2;
+  --text:#2C2F36; --muted:#8A9099; --radius:8px;
+  --shadow:0 1px 4px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font:13px/1.6 "Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+  overflow:hidden;
+}
+#app{display:flex;flex-direction:column;height:100vh}
+.hidden{display:none !important}
+code{font-family:Consolas,Monaco,monospace;font-size:12px;color:#555;
+     background:#F2F4F7;padding:2px 6px;border-radius:4px;word-break:break-all}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

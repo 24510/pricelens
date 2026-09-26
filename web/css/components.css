@@ -1,0 +1,63 @@
+/* 顶栏 */
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  height:56px;padding:0 20px;background:#fff;border-bottom:1px solid var(--line);flex:none}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{color:var(--orange);font-size:20px}
+.brand h1{margin:0;font-size:16px;font-weight:600}
+.brand h1 small{color:var(--muted);font-weight:400;margin-left:6px;font-size:12px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.ver{color:var(--muted);font-size:12px}
+
+/* 徽标 */
+.badge{padding:3px 10px;border-radius:12px;font-size:12px;border:1px solid transparent}
+.badge-muted{background:#F2F4F7;color:#666}
+.badge-local{background:#FFF4E8;color:var(--orange-dark);border-color:#FFE0C2}
+.badge-enhanced{background:#EAF7EF;color:var(--green);border-color:#CDEBD8}
+
+/* 主区域 */
+.content{flex:1;overflow-y:auto;padding:20px;max-width:1100px;width:100%;margin:0 auto}
+
+/* 面板 */
+.panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:18px 20px;margin-bottom:16px}
+.panel h2{margin:6px 0 8px;font-size:17px}
+.panel h3{margin:0 0 12px;font-size:14px;font-weight:600;color:#444}
+
+/* 卡片组 */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:14px 16px}
+.card-label{color:var(--muted);font-size:12px;margin-bottom:6px}
+.card-value{font-size:22px;font-weight:600;color:var(--orange)}
+
+/* 信息行 */
+.info-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.info-row .label{color:var(--muted);flex:none;width:70px}
+
+/* 按钮 */
+.btn{border:1px solid #DDD;background:#fff;color:#444;border-radius:6px;
+  padding:6px 14px;cursor:pointer;font-size:13px;transition:.15s}
+.btn:hover{border-color:var(--orange);color:var(--orange)}
+.btn-primary{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn-primary:hover{background:var(--orange-dark);border-color:var(--orange-dark);color:#fff}
+.btn-sm{padding:3px 10px;font-size:12px}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+
+/* 逃生通道面板 */
+.chooser-icon{font-size:34px;color:#E8A33D;margin-bottom:4px}
+.tips{margin:12px 0;padding-left:18px;color:#666;line-height:2}
+.msg{color:var(--red);min-height:18px;margin-top:10px}
+
+/* 表格 */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th,.tbl td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);font-size:13px}
+.tbl th{color:var(--muted);font-weight:normal;background:#FAFBFC}
+
+/* 空状态 */
+.empty{text-align:center;padding:44px 20px;color:#999}
+.empty-icon{font-size:30px;margin-bottom:8px}
+
+/* 状态栏 */
+.statusbar{flex:none;height:30px;display:flex;align-items:center;
+  padding:0 20px;background:#fff;border-top:1px solid var(--line);
+  color:var(--muted);font-size:12px}

@@ -1,0 +1,39 @@
+# ============================================================
+# PriceLens .gitignore
+# 原则：数据、隐私、环境、产物 一律不进仓库
+# ============================================================
+
+# --- 数据与隐私（★绝不提交★）---
+PriceLensData/
+*.db
+*.sqlite3
+config.ini
+
+# --- 虚拟环境 ---
+.venv/
+venv/
+env/
+
+# --- 打包产物与缓存 ---
+build/output/
+build/dist/
+build/_build/
+dist/
+__pycache__/
+*.pyc
+*.pyo
+
+# --- 调试 / 临时文件 ---
+src_dump*.txt
+git_status.txt
+doctor-report.txt
+*.log
+
+# --- 编辑器与系统文件 ---
+.vscode/
+.idea/
+.pytest_cache/
+.ruff_cache/
+Thumbs.db
+Desktop.ini
+~$*

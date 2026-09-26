@@ -1,0 +1,95 @@
+/* ===== 密钥设置面板 ===== */
+
+#btnKeys { margin-right: 10px; }
+
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-mask.hidden { display: none; }
+
+.modal {
+  width: 660px;
+  max-width: calc(100vw - 48px);
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, .28);
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.modal-head h3 { margin: 0; font-size: 16px; }
+.modal-close {
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  color: #64748b;
+  line-height: 1;
+}
+.modal-body { padding: 16px 18px; overflow-y: auto; }
+.modal-foot {
+  padding: 12px 18px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pf-block { margin-bottom: 22px; }
+.pf-block h4 { margin: 0 0 6px; font-size: 14px; }
+
+.pf-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+.pf-field label {
+  flex: 0 0 130px;
+  font-size: 13px;
+  color: #334155;
+}
+.pf-field input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+}
+.pf-field input:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, .12);
+}
+.pf-status {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.pf-status.ok { color: #16a34a; }
+
+.pf-actions { margin-top: 8px; display: flex; gap: 8px; }
+
+.set-msg { min-height: 20px; font-size: 13px; margin-top: 10px; }
+.set-msg.ok { color: #16a34a; }
+.set-msg.err { color: #dc2626; }
+.set-note {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}

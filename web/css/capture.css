@@ -1,0 +1,22 @@
+/* ===== 一键记价（采集通道）面板 ===== */
+
+#capSteps {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: #475569;
+  font-size: 12.5px;
+  line-height: 2;
+}
+#capSteps code {
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+#capScript {
+  word-break: break-all;
+}
+#btnCapRotate[data-armed="1"] {
+  border-color: #fecaca;
+  color: #dc2626;
+  background: #fef2f2;
+}
