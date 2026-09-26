@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""应用运行时上下文：数据根 + 配置 + 数据库 + 日志 + 采集接口。"""
+"""应用运行时上下文：数据根 + 配置 + 数据库 + 日志 + 采集接口 + 自动刷新。"""
 from __future__ import annotations
 
 import logging
@@ -25,11 +25,13 @@ class AppContext:
         self.log: logging.Logger = logging.getLogger("pricelens")
         self.api = None                 # api_server.ApiServer 实例
         self.api_error = ""             # 采集接口启动失败原因（展示用）
+        self.refresh = None             # refresh.RefreshEngine 实例（P3 自动刷新）
 
     # ---------- 初始化（确定数据根后调用） ----------
 
     def init_at(self, data_root: Path, escape: bool = False,
-                start_api: bool = True) -> None:
+                start_api: bool = True, start_refresh: bool = True) -> None:
+        self.stop_refresh()             # 切换数据目录时先停掉旧调度器
         self.data_root = Path(data_root).resolve()
         self.escape_mode = escape
 
@@ -70,6 +72,12 @@ class AppContext:
         # 6) 采集接口（浏览器脚本上报用）
         if start_api:
             self.start_api()
+
+        # 7) 自动刷新调度器（P3：官方接口定时查价）
+        if start_refresh:
+            self.start_refresh()
+        else:
+            self.refresh = None
 
         self.log.info("初始化完成：模式=%s，界面端口=%s，接口端口=%s",
                       "增强" if self.enhanced else "本地",
@@ -132,6 +140,43 @@ class AppContext:
             "error": self.api_error,
         }
 
+    # ---------- 自动刷新（P3） ----------
+
+    def start_refresh(self) -> None:
+        """启动自动刷新调度器；任何异常都不影响主流程。"""
+        self.stop_refresh()
+        if self.db is None:
+            return
+        try:
+            from refresh import RefreshEngine
+            engine = RefreshEngine(self)
+            engine.start()
+            self.refresh = engine
+        except Exception as exc:
+            self.log.warning("自动刷新调度器启动失败：%s", exc)
+            self.refresh = None
+
+    def stop_refresh(self) -> None:
+        if self.refresh is not None:
+            try:
+                self.refresh.stop()
+            except Exception:
+                pass
+            self.refresh = None
+
+    def refresh_status(self) -> Dict[str, object]:
+        """供界面读取的调度器状态。"""
+        if self.refresh is None:
+            return {"enabled": False, "running": False, "busy": False,
+                    "mock": False, "phase": "", "interval_minutes": 0,
+                    "next_at": "", "last": None}
+        try:
+            return self.refresh.status()
+        except Exception as exc:
+            return {"enabled": False, "running": False, "busy": False,
+                    "mock": False, "phase": "", "interval_minutes": 0,
+                    "next_at": "", "last": None, "error": str(exc)}
+
     # ---------- 只读属性 ----------
 
     @property
@@ -191,9 +236,11 @@ class AppContext:
         }
         result["stats"] = self.db.stats() if self.db else {"items": 0, "prices": 0}
         result["api"] = self.api_info()
+        result["refresh"] = self.refresh_status()
         return result
 
     def close(self) -> None:
+        self.stop_refresh()
         self.stop_api()
         if self.db:
             self.db.close()

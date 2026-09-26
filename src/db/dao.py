@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""数据库访问层：初始化 + meta/settings + 商品 + 价格 + 导出。"""
+"""数据库访问层：初始化 + meta/settings + 商品 + 价格 + 自动刷新状态 + 导出。"""
 from __future__ import annotations
 
 import sqlite3
@@ -47,6 +47,13 @@ class Database:
                 self._conn.execute("PRAGMA table_info(prices)").fetchall()}
         if "note" not in cols:
             self._conn.execute("ALTER TABLE prices ADD COLUMN note TEXT DEFAULT ''")
+        # P3：自动刷新状态列（items 表）
+        icols = {row["name"] for row in
+                 self._conn.execute("PRAGMA table_info(items)").fetchall()}
+        if "last_check_at" not in icols:
+            self._conn.execute("ALTER TABLE items ADD COLUMN last_check_at TEXT")
+        if "last_check_error" not in icols:
+            self._conn.execute("ALTER TABLE items ADD COLUMN last_check_error TEXT")
 
     # ---------- meta / settings ----------
 
@@ -177,13 +184,22 @@ class Database:
         return [dict(r) for r in rows]
 
     def add_price(self, item_pk: int, price: float, captured_at: str = "",
-                  source: str = "manual", note: str = "") -> int:
+                  source: str = "manual", note: str = "",
+                  list_price: Optional[float] = None,
+                  coupon: Optional[float] = None) -> int:
         ts = (captured_at or "").strip() or now_str()
+
+        def _num(v):
+            try:
+                return float(v) if v is not None else None
+            except Exception:
+                return None
+
         with self._lock:
             cur = self._conn.execute(
-                "INSERT INTO prices(item_fk, captured_at, price, source, note) "
-                "VALUES(?,?,?,?,?)",
-                (item_pk, ts, float(price), source, note))
+                "INSERT INTO prices(item_fk, captured_at, price, list_price, coupon, source, note) "
+                "VALUES(?,?,?,?,?,?,?)",
+                (item_pk, ts, float(price), _num(list_price), _num(coupon), source, note))
             self._conn.execute("UPDATE items SET last_sample_at=? WHERE id=?", (ts, item_pk))
             self._conn.commit()
         return int(cur.lastrowid)
@@ -215,6 +231,51 @@ class Database:
             "last": last["price"] if last else None,
             "last_at": last["captured_at"] if last else None,
         }
+
+    # ---------- 自动刷新（P3） ----------
+
+    def latest_price(self, item_pk: int) -> Optional[Dict[str, Any]]:
+        """最近一条价格（供自动刷新比对用）。"""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT price, captured_at FROM prices WHERE item_fk=? "
+                "ORDER BY captured_at DESC, id DESC LIMIT 1", (item_pk,)).fetchone()
+        return dict(row) if row else None
+
+    def latest_change_at(self) -> Optional[str]:
+        """最近一次「价格变化」的时间（价格只在变化时入库，故取最大值）。"""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT MAX(captured_at) AS t FROM prices").fetchone()
+        return row["t"] if row and row["t"] else None
+
+    def touch_check(self, item_pk: int, at: str, error: str = "") -> None:
+        """更新商品的「最后检查」状态（不产生价格记录）。"""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE items SET last_check_at=?, last_check_error=? WHERE id=?",
+                (at, str(error or "")[:200], int(item_pk)))
+            self._conn.commit()
+
+    def log_refresh_run(self, trigger: str, started_at: str, finished_at: str,
+                        total: int, ok: int, changed: int, new_low: int,
+                        failed: int, message: str = "") -> int:
+        """记录一轮自动刷新（refresh_runs 表）。"""
+        with self._lock:
+            cur = self._conn.execute(
+                "INSERT INTO refresh_runs(trigger, started_at, finished_at, total, ok, "
+                "changed, new_low, failed, message) VALUES(?,?,?,?,?,?,?,?,?)",
+                (trigger, started_at, finished_at, int(total), int(ok), int(changed),
+                 int(new_low), int(failed), str(message or "")[:300]))
+            self._conn.commit()
+        return int(cur.lastrowid)
+
+    def recent_refresh_runs(self, limit: int = 10) -> List[Dict[str, Any]]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM refresh_runs ORDER BY id DESC LIMIT ?",
+                (int(limit),)).fetchall()
+        return [dict(r) for r in rows]
 
     # ---------- 导出 ----------
 
