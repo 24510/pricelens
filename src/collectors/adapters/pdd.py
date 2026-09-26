@@ -8,7 +8,8 @@
     goods_sign，并缓存到 settings（键：pdd_sign:<数字ID>），此后直接复用；
   · 签名：sign = MD5(client_secret + 排序后"键值直接拼接" + client_secret)，
     大写十六进制；所有参数（除 sign）参与签名；
-  · 网关：POST https://gw-api.pinduoduo.com/api/router（表单编码）；
+  · 网关：POST https://gw-api.pinduoduo.com/api/router（表单编码，仅 POST）；
+  · 公共参数含 data_type=JSON：明确要求返回 JSON（官方协议公共参数之一）；
   · 详情接口无需 access_token（多多客无须授权接口）；
   · 自测：构造参数 endpoint 或环境变量 PRICELENS_PDD_ENDPOINT 可覆盖网关。
 
@@ -116,6 +117,7 @@ class PddCollector(BaseCollector):
             "type": api_type,
             "client_id": client_id,
             "timestamp": str(int(time.time())),
+            "data_type": "JSON",
         }
         for key, value in (params or {}).items():
             text = "" if value is None else str(value).strip()
